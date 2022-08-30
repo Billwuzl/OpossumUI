@@ -5,6 +5,7 @@
 
 import { ElectronApplication, Page } from 'playwright';
 import { E2E_LARGE_TEST_TIMEOUT, getApp } from '../test-helpers/test-helpers';
+import { expect } from '@playwright/test';
 
 jest.setTimeout(E2E_LARGE_TEST_TIMEOUT);
 
@@ -26,6 +27,7 @@ describe('Open large zipped file via command line', () => {
 
   // The test was flaky and is now disabled.
   it.skip('should open large zipped file via command line', async () => {
-    await window.$$('text=package.json');
+    const packageJsonEntry = window.locator('text=package.json');
+    await expect(packageJsonEntry).toHaveCount(1);
   });
 });

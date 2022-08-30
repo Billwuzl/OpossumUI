@@ -10,6 +10,7 @@ import {
   getApp,
 } from '../test-helpers/test-helpers';
 import * as os from 'os';
+import { expect } from '@playwright/test';
 
 jest.setTimeout(E2E_TEST_TIMEOUT);
 
@@ -34,9 +35,12 @@ describe('The OpossumUI', () => {
   });
 
   it('should find view buttons', async () => {
-    await window.$$('text=Audit');
-    await window.$$('text=Attribution');
-    await window.$$('text=Report');
+    const auditViewButton = window.locator('text=Audit');
+    await expect(auditViewButton).toHaveCount(1);
+    const attributionViewButton = window.locator('text=Attribution');
+    await expect(attributionViewButton).toHaveCount(1);
+    const reportViewButton = window.locator('text=Report');
+    await expect(reportViewButton).toHaveCount(1);
   });
 });
 
@@ -57,27 +61,36 @@ describe('Open file via command line', () => {
   });
 
   it('should open file when provided as command line arg', async () => {
-    await window.$$('text=Frontend');
-    await window.click('text=ElectronBackend');
+    const frontendEntry = window.locator('text=Frontend');
+    await expect(frontendEntry).toHaveCount(1);
 
-    await window.click('text=main.ts');
+    const electronBackendEntry = window.locator('text=ElectronBackend');
+    await electronBackendEntry.click();
 
-    expect(await window.$$('text=jQuery, 16.13.1')).toBeTruthy();
+    const mainTsEntry = window.locator('text=main.ts');
+    await mainTsEntry.click();
+
+    const jsQueryPackage = window.locator('text=jQuery, 16.13.1');
+    await expect(jsQueryPackage).toHaveCount(1);
   });
 
   // getOpenLinkListener does not work properly on Linux
   conditionalIt(os.platform() !== 'linux')(
     'should open an error popup if the base url is invalid',
     async () => {
-      await window.click('text=ElectronBackend');
-      await window.click("[aria-label='link to open']");
+      const electronBackendEntry = window.locator('text=ElectronBackend');
+      await electronBackendEntry.click();
+      const openLinkIcon = window.locator("[aria-label='link to open']");
+      await openLinkIcon.click();
 
-      expect(await window.$$('text=Cannot open link.')).toBeTruthy();
+      await expect(window.locator('text=Cannot open link.')).toHaveCount(1);
 
-      await window.click('text=Types');
-      await window.click("[aria-label='link to open']");
+      const typesEntry = window.locator('text=Types');
+      await typesEntry.click();
+      await window.locator("[aria-label='link to open']").click();
 
-      expect(await window.$$('text=Cannot open link.')).toBeTruthy();
+      const errorPopup = window.locator('text=Cannot open link.');
+      await expect(errorPopup).toHaveCount(1);
     }
   );
 });
